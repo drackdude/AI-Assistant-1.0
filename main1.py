@@ -4,6 +4,11 @@ import pyttsx3 as tx
 listener = sp.Recognizer()
 speaker = tx.init()
 
+# change voice 
+voices = speaker.getProperty('voices')
+speaker.setProperty('voice', voices[1].id)
+
+
 def listen():
     with sp.Microphone() as microphone:
         print("Listening...")
@@ -19,7 +24,10 @@ def listen():
             print("error: ", e,"error 2")
         return ""
 
+
 def speak(text):
     speaker.say(text)
     speaker.runAndWait()
+
+
 

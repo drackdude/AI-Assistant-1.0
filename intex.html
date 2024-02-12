@@ -1,0 +1,58 @@
+<!-- index.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audio Recorder and Uploader</title>
+</head>
+<body>
+    <h1>Audio Recorder and Uploader</h1>
+    <button onclick="startRecording()">Start Recording</button>
+    <button onclick="stopRecording()">Stop Recording</button>
+    <audio id="audioElement" controls></audio>
+    <button onclick="uploadAudio()">Upload Audio</button>
+
+    <script>
+        let mediaRecorder;
+        let audioChunks = [];
+
+        async function startRecording() {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            mediaRecorder = new MediaRecorder(stream);
+
+            mediaRecorder.addEventListener('dataavailable', event => {
+                audioChunks.push(event.data);
+            });
+
+            mediaRecorder.addEventListener('stop', () => {
+                const audioBlob = new Blob(audioChunks);
+                const audioUrl = URL.createObjectURL(audioBlob);
+                document.getElementById('audioElement').src = audioUrl;
+            });
+
+            mediaRecorder.start();
+        }
+
+        function stopRecording() {
+            mediaRecorder.stop();
+        }
+
+        async function uploadAudio() {
+            const audioBlob = new Blob(audioChunks);
+            const formData = new FormData();
+            formData.append('file', audioBlob, 'recording.wav');
+
+            const response = await fetch('http://localhost:8000/upload/', {
+                method: 'POST',
+                body: formData
+            });
+
+            const data = await response.json();
+            console.log(data);
+            alert("File uploaded successfully!");
+        }
+    </script>
+</body>
+</html>
